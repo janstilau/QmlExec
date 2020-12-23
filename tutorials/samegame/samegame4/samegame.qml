@@ -1,63 +1,19 @@
-/****************************************************************************
-**
-** Copyright (C) 2017 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the examples of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:BSD$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** BSD License Usage
-** Alternatively, you may use this file under the terms of the BSD license
-** as follows:
-**
-** "Redistribution and use in source and binary forms, with or without
-** modification, are permitted provided that the following conditions are
-** met:
-**   * Redistributions of source code must retain the above copyright
-**     notice, this list of conditions and the following disclaimer.
-**   * Redistributions in binary form must reproduce the above copyright
-**     notice, this list of conditions and the following disclaimer in
-**     the documentation and/or other materials provided with the
-**     distribution.
-**   * Neither the name of The Qt Company Ltd nor the names of its
-**     contributors may be used to endorse or promote products derived
-**     from this software without specific prior written permission.
-**
-**
-** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-** "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
-
 import QtQuick 2.0
 import "content"
-import "content/samegame.js" as SameGame
+import "content/samegame.js" as SameGame // 一次引入, 就执行一次里面的初始化操作.
+
+
+// SameGame 里面, 可以直接使用 id 所指向的那些值.
 
 Rectangle {
     id: screen
 
     width: 490; height: 720
 
+    // SystemPalette 用来获取系统相关的配色.
     SystemPalette { id: activePalette }
+    // 子控件的 Button, 居然可以直接使用到父对象里面定义的一个属性.
+    property string labelText : "这是最上层的一个属性, 看一看下层能接收到不."
 
     Item {
         width: parent.width
@@ -76,6 +32,7 @@ Rectangle {
             property int blockSize: 40
 
             anchors.centerIn: parent
+           // 这里, 是计算, 刚好能够进行显示.
             width: parent.width - (parent.width % blockSize);
             height: parent.height - (parent.height % blockSize);
 
@@ -104,10 +61,11 @@ Rectangle {
     }
     //![0]
 
+    // 底部的工具栏.
     Rectangle {
         id: toolBar
         width: parent.width; height: 30
-        color: activePalette.window
+        color: activePalette.window // 这里, 使用系统的调色板, 显得很自然.
         anchors.bottom: screen.bottom
 
         Button {
@@ -119,7 +77,7 @@ Rectangle {
         Text {
             id: score
             anchors { right: parent.right; verticalCenter: parent.verticalCenter }
-            text: "Score: " + gameCanvas.score
+            text: "Score: " + gameCanvas.score // 这里, 直接绑定了 score 的显示.
         }
     }
 }

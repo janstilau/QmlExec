@@ -1,11 +1,18 @@
 /* This script file handles the game logic */
+
 .import QtQuick.LocalStorage 2.0 as Sql
 .import QtQuick 2.0 as Quick
+
+/*
+  在 JS 里面, 完完全全就是数据的操作.
+  唯一 View 相关的, 可能就是 x, y 的改变操作.
+  View 层的爆炸效果, 以及移动动画, 在 BoomBlock 里面完成的.
+  */
 
 var maxColumn = 10;
 var maxRow = 15;
 var maxIndex = maxColumn * maxRow;
-var board = new Array(maxIndex);
+var board = new Array(maxIndex); // 一个全局量. 还是说, 进入一次, 就是一个新的生成呢???
 var component;
 var scoresURL = "";
 var gameDuration;
@@ -16,13 +23,13 @@ function index(column, row) {
 }
 
 function startNewGame() {
-    //Delete blocks from previous game
+    // 首先, 做一次原有数据的清零操作.
     for (var i = 0; i < maxIndex; i++) {
-        if (board[i] != null)
+        if (board[i] !== null)
             board[i].destroy();
     }
 
-    //Calculate board size
+    // 不是太明白, JS 环境里面, 为什么可以直接拿到 id 对应的数据.
     maxColumn = Math.floor(gameCanvas.width / gameCanvas.blockSize);
     maxRow = Math.floor(gameCanvas.height / gameCanvas.blockSize);
     maxIndex = maxRow * maxColumn;
@@ -45,15 +52,16 @@ function startNewGame() {
 }
 
 function createBlock(column, row) {
-    if (component == null)
+    if (component === null) {
         component = Qt.createComponent("BoomBlock.qml");
+    }
 
     // Note that if Block.qml was not a local file, component.status would be
     // Loading and we should wait for the component's statusChanged() signal to
     // know when the file is downloaded and ready before calling createObject().
-    if (component.status == Quick.Component.Ready) {
+    if (component.status === Quick.Component.Ready) {
         var dynamicObject = component.createObject(gameCanvas);
-        if (dynamicObject == null) {
+        if (dynamicObject === null) {
             console.log("error creating block");
             console.log(component.errorString());
             return false;
@@ -65,6 +73,7 @@ function createBlock(column, row) {
         dynamicObject.height = gameCanvas.blockSize;
         dynamicObject.spawned = true;
         board[index(column, row)] = dynamicObject;
+        // 填入数据.
     } else {
         console.log("error loading block component");
         console.log(component.errorString());
@@ -81,7 +90,7 @@ function handleClick(xPos, yPos) {
     var row = Math.floor(yPos / gameCanvas.blockSize);
     if (column >= maxColumn || column < 0 || row >= maxRow || row < 0)
         return;
-    if (board[index(column, row)] == null)
+    if (board[index(column, row)] === null)
         return;
     //If it's a valid block, remove it and all connected (does nothing if it's not connected)
     floodFill(column, row, -1);
@@ -93,10 +102,10 @@ function handleClick(xPos, yPos) {
 }
 
 function floodFill(column, row, type) {
-    if (board[index(column, row)] == null)
+    if (board[index(column, row)] === null)
         return;
     var first = false;
-    if (type == -1) {
+    if (type === -1) {
         first = true;
         type = board[index(column, row)].type;
 
@@ -115,8 +124,8 @@ function floodFill(column, row, type) {
     floodFill(column, row - 1, type);
     if (first == true && fillFound == 0)
         return;     //Can't remove single blocks
-    board[index(column, row)].dying = true;
-    board[index(column, row)] = null;
+    board[index(column, row)].dying = true; // UI 改变
+    board[index(column, row)] = null;// 数据改变.
     fillFound += 1;
 }
 
@@ -125,10 +134,11 @@ function shuffleDown() {
     for (var column = 0; column < maxColumn; column++) {
         var fallDist = 0;
         for (var row = maxRow - 1; row >= 0; row--) {
-            if (board[index(column, row)] == null) {
+            if (board[index(column, row)] === null) {
                 fallDist += 1;
             } else {
                 if (fallDist > 0) {
+                    // 修改新的位置, 修改棋盘的数据.
                     var obj = board[index(column, row)];
                     obj.y = (row + fallDist) * gameCanvas.blockSize;
                     board[index(column, row + fallDist)] = obj;
